@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta 0 — Diagnóstico | Método HAG</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a18;min-height:100vh;padding:1.5rem 1rem}
+  .wrap{max-width:820px;margin:0 auto}
+  .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;padding-bottom:.875rem;border-bottom:1px solid #e0dfd8}
+  .header-left{display:flex;flex-direction:column;gap:3px}
+  .header-title{font-size:16px;font-weight:600;color:#1a1a18}
+  .header-sub{font-size:12px;color:#888780}
+  .badge{font-size:11px;font-weight:500;background:#e6f1fb;color:#185fa5;padding:3px 10px;border-radius:8px}
+  .section{background:#fff;border:1px solid #e0dfd8;border-radius:12px;padding:.875rem 1rem;margin-bottom:.75rem}
+  .sec-title{font-size:10px;font-weight:600;color:#888780;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem}
+  .row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-start;margin-bottom:.5rem}
+  .row:last-child{margin-bottom:0}
+  .field-label{font-size:12px;color:#888780;min-width:110px;padding-top:6px;flex-shrink:0}
+  .field-input{flex:1;min-width:120px;font-size:13px;border:1px solid #e0dfd8;border-radius:8px;padding:5px 9px;background:#fafaf8;color:#1a1a18;outline:none;resize:none;font-family:inherit;transition:border-color .12s}
+  .field-input:focus{border-color:#888780;background:#fff}
+  textarea.field-input{min-height:44px;line-height:1.5}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;flex:1}
+  .chip{display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:4px 10px;border-radius:20px;border:1px solid #e0dfd8;background:#fafaf8;color:#888780;user-select:none;transition:all .12s}
+  .chip:hover{border-color:#b4b2a9;color:#5f5e5a}
+  .chip.on{background:#e6f1fb;color:#185fa5;border-color:#b5d4f4;font-weight:500}
+  .chip.on.warn{background:#faeeda;color:#854f0b;border-color:#fac775}
+  .chip.on.danger{background:#fcebeb;color:#a32d2d;border-color:#f7c1c1}
+  .chip.on.success{background:#eaf3de;color:#3b6d11;border-color:#c0dd97}
+  .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.6;flex-shrink:0}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.625rem}
+  .inbody-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.25rem}
+  .metric{background:#f5f5f3;border-radius:8px;padding:.5rem .625rem}
+  .metric-label{font-size:10px;color:#888780;margin-bottom:4px;font-weight:500}
+  .metric-input{font-size:15px;font-weight:600;width:100%;background:transparent;border:none;color:#1a1a18;outline:none;font-family:inherit}
+  .divider{height:1px;background:#f0efe8;margin:.625rem 0}
+  .copy-btn{font-size:13px;font-weight:500;padding:7px 16px;border-radius:8px;border:1px solid #d3d1c7;background:#fff;color:#1a1a18;cursor:pointer;transition:all .12s}
+  .copy-btn:hover{background:#f5f5f3;border-color:#b4b2a9}
+  .copy-btn.copied{background:#eaf3de;color:#3b6d11;border-color:#c0dd97}
+  .nivel-chip{font-size:12px;cursor:pointer;padding:5px 12px;border-radius:20px;border:1px solid #e0dfd8;background:#fafaf8;color:#888780;user-select:none;transition:all .12s;white-space:nowrap}
+  .nivel-chip:hover{border-color:#b4b2a9;color:#5f5e5a}
+  .nivel-chip.on{background:#e6f1fb;color:#185fa5;border-color:#b5d4f4;font-weight:500}
+  .sub-label{font-size:10px;color:#888780;margin-bottom:.4rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  @media(max-width:560px){.two-col,.three-col{grid-template-columns:1fr}.inbody-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-left">
+      <div class="header-title">Consulta 0 — Diagnóstico</div>
+      <div class="header-sub">Método HAG · Dr. Henrique Gonzaga · CRM/SP 226530</div>
+    </div>
+    <button class="copy-btn" id="copyBtn" onclick="copiarProntuario()">Copiar prontuário</button>
+  </div>
+
+  <!-- IDENTIFICAÇÃO -->
+  <div class="section">
+    <div class="sec-title">Identificação do paciente</div>
+    <div class="two-col">
+      <div>
+        <div class="row"><span class="field-label">Nome</span><input class="field-input" id="pacNome" type="text" placeholder="Nome completo"></div>
+        <div class="row"><span class="field-label">Data de nascimento</span><input class="field-input" id="pacNasc" type="text" placeholder="dd/mm/aaaa" style="max-width:130px"></div>
+        <div class="row"><span class="field-label">Idade</span><input class="field-input" id="pacIdade" type="text" placeholder="anos" style="max-width:70px"></div>
+      </div>
+      <div>
+        <div class="row"><span class="field-label">Sexo</span>
+          <div class="chips" id="pacSexo">
+            <div class="chip" onclick="toggleSingle(this,'pacSexo')">Masculino</div>
+            <div class="chip" onclick="toggleSingle(this,'pacSexo')">Feminino</div>
+          </div>
+        </div>
+        <div class="row"><span class="field-label">Data da consulta</span><input class="field-input" id="pacData" type="text" placeholder="dd/mm/aaaa" style="max-width:130px"></div>
+        <div class="row"><span class="field-label">Modalidade</span>
+          <div class="chips" id="pacModalidade">
+            <div class="chip" onclick="toggleSingle(this,'pacModalidade')">Presencial</div>
+            <div class="chip" onclick="toggleSingle(this,'pacModalidade')">Online</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S -->
+  <div class="section">
+    <div class="sec-title">S — Subjetivo</div>
+
+    <div class="row">
+      <span class="field-label">Queixa principal</span>
+      <textarea class="field-input" id="queixa" placeholder="Em palavras do paciente..." rows="2"></textarea>
+    </div>
+    <div class="row">
+      <span class="field-label">Objetivo</span>
+      <textarea class="field-input" id="objetivo" placeholder="Onde quer chegar..." rows="1"></textarea>
+    </div>
+    <div class="row">
+      <span class="field-label">Já tentou</span>
+      <textarea class="field-input" id="tentativas" placeholder="Estratégias anteriores..." rows="1"></textarea>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <span class="field-label">Maior dificuldade</span>
+      <div class="chips" id="dificuldade">
+        <div class="chip" onclick="toggle(this)"><span class="dot"></span>Fome</div>
+        <div class="chip" onclick="toggle(this)"><span class="dot"></span>Compulsão</div>
+        <div class="chip" onclick="toggle(this)"><span class="dot"></span>Rotina</div>
+        <div class="chip" onclick="toggle(this)"><span class="dot"></span>Ansiedade</div>
+        <div class="chip" onclick="toggle(this)"><span class="dot"></span>FDS</div>
+        <div class="chip" onclick="toggle(this)"><span class="dot"></span>Cansaço</div>
+        <div class="chip" onclick="toggle(this)"><span class="dot"></span>Treino</div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:.375rem">
+      <span class="field-label">Perfil alimentar</span>
+      <div class="chips" id="perfil">
+        <div class="chip" onclick="toggleSingle(this,'perfil')"><span class="dot"></span>Desorganizado</div>
+        <div class="chip" onclick="toggleSingle(this,'perfil')"><span class="dot"></span>Beliscador</div>
+        <div class="chip" onclick="toggleSingle(this,'perfil')"><span class="dot"></span>Compulsivo</div>
+        <div class="chip" onclick="toggleSingle(this,'perfil')"><span class="dot"></span>Restritivo</div>
+        <div class="chip" onclick="toggleSingle(this,'perfil')"><span class="dot"></span>Misto</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="two-col">
+      <div>
+        <div class="row"><span class="field-label">Peso máx.</span><input class="field-input" id="pesoMax" type="text" placeholder="kg"></div>
+        <div class="row"><span class="field-label">Peso desejado</span><input class="field-input" id="pesoDesejado" type="text" placeholder="kg"></div>
+        <div class="row"><span class="field-label">Início ganho</span><input class="field-input" id="inicioGanho" type="text" placeholder="Quando / gatilho"></div>
+      </div>
+      <div>
+        <div class="row">
+          <span class="field-label">Rebote</span>
+          <div class="chips" id="rebote">
+            <div class="chip" onclick="toggleSingle(this,'rebote')">Sim</div>
+            <div class="chip" onclick="toggleSingle(this,'rebote')">Não</div>
+          </div>
+        </div>
+        <div class="row"><span class="field-label">Med. prévia</span><input class="field-input" id="medPrevia" type="text" placeholder="Qual / quando"></div>
+        <div class="row"><span class="field-label">Disposição (0–10)</span><input class="field-input" id="disposicao" type="number" min="0" max="10" placeholder="0–10" style="max-width:70px"></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <span class="field-label">Sono</span>
+      <div class="chips" id="sono">
+        <div class="chip" onclick="toggleSingle(this,'sono')">Adequado</div>
+        <div class="chip" onclick="toggleSingle(this,'sono')">Irregular</div>
+        <div class="chip warn" onclick="toggleSingle(this,'sono')">Insuficiente</div>
+      </div>
+      <input class="field-input" id="sonoHorario" type="text" placeholder="Dorme: __h — Acorda: __h" style="max-width:200px">
+    </div>
+    <div class="row" style="margin-top:.375rem">
+      <span class="field-label">Estresse</span>
+      <div class="chips" id="estresse">
+        <div class="chip" onclick="toggleSingle(this,'estresse')">Baixo</div>
+        <div class="chip warn" onclick="toggleSingle(this,'estresse')">Moderado</div>
+        <div class="chip danger" onclick="toggleSingle(this,'estresse')">Alto</div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:.375rem">
+      <span class="field-label">Fome emocional</span>
+      <div class="chips" id="fomeEmocional">
+        <div class="chip" onclick="toggleSingle(this,'fomeEmocional')">Ausente</div>
+        <div class="chip" onclick="toggleSingle(this,'fomeEmocional')">Leve</div>
+        <div class="chip warn" onclick="toggleSingle(this,'fomeEmocional')">Moderada</div>
+        <div class="chip danger" onclick="toggleSingle(this,'fomeEmocional')">Importante</div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:.375rem">
+      <span class="field-label">Período difícil</span>
+      <div class="chips" id="periodo">
+        <div class="chip" onclick="toggle(this)">Manhã</div>
+        <div class="chip" onclick="toggle(this)">Tarde</div>
+        <div class="chip" onclick="toggle(this)">Noite</div>
+        <div class="chip" onclick="toggle(this)">FDS</div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:.375rem">
+      <span class="field-label">Álcool</span>
+      <div class="chips" id="alcool">
+        <div class="chip" onclick="toggleSingle(this,'alcool')">Não</div>
+        <div class="chip" onclick="toggleSingle(this,'alcool')">Social</div>
+        <div class="chip warn" onclick="toggleSingle(this,'alcool')">Frequente</div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:.375rem">
+      <span class="field-label">Atividade física</span>
+      <input class="field-input" id="atividadeFisica" type="text" placeholder="Frequência / modalidade">
+    </div>
+  </div>
+
+  <!-- O -->
+  <div class="section">
+    <div class="sec-title">O — Objetivo</div>
+
+    <div class="sub-label">InBody — Ponto A</div>
+    <div class="inbody-grid">
+      <div class="metric"><div class="metric-label">Peso total (kg)</div><input class="metric-input" id="ib_peso" type="text" placeholder="—"></div>
+      <div class="metric"><div class="metric-label">Massa magra (kg)</div><input class="metric-input" id="ib_magra" type="text" placeholder="—"></div>
+      <div class="metric"><div class="metric-label">Gordura (kg)</div><input class="metric-input" id="ib_gord_kg" type="text" placeholder="—"></div>
+      <div class="metric"><div class="metric-label">Gordura (%)</div><input class="metric-input" id="ib_gord_pct" type="text" placeholder="—"></div>
+      <div class="metric"><div class="metric-label">Visceral</div><input class="metric-input" id="ib_visc" type="text" placeholder="—"></div>
+      <div class="metric"><div class="metric-label">Perfil</div><input class="metric-input" id="ib_perfil" type="text" placeholder="—"></div>
+    </div>
+
+    <div class="row" style="margin-top:.75rem">
+      <span class="field-label">Perfil corporal</span>
+      <div class="chips" id="perfilCorporal">
+        <div class="chip" onclick="toggle(this)">Adiposidade central</div>
+        <div class="chip" onclick="toggle(this)">Adiposidade global</div>
+        <div class="chip" onclick="toggle(this)">Sarcopênico</div>
+        <div class="chip" onclick="toggle(this)">Retenção / inflamação</div>
+        <div class="chip" onclick="toggle(this)">Recomposição necessária</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="sub-label">Exames — destaques</div>
+    <div class="two-col">
+      <div>
+        <div class="row"><span class="field-label" style="min-width:90px">Glicêmico</span><input class="field-input" id="ex_glicemico" type="text" placeholder="Glicemia, HbA1c, insulina..."></div>
+        <div class="row"><span class="field-label" style="min-width:90px">Lipídios / CV</span><input class="field-input" id="ex_lipidios" type="text" placeholder="CT, LDL, HDL, TG..."></div>
+        <div class="row"><span class="field-label" style="min-width:90px">Inflamação</span><input class="field-input" id="ex_inflamacao" type="text" placeholder="PCR, VHS..."></div>
+        <div class="row"><span class="field-label" style="min-width:90px">Hormonal</span><input class="field-input" id="ex_hormonal" type="text" placeholder="TSH, T4, testosterona..."></div>
+      </div>
+      <div>
+        <div class="row"><span class="field-label" style="min-width:90px">Hepático / renal</span><input class="field-input" id="ex_hepatico" type="text" placeholder="TGO, TGP, creatinina..."></div>
+        <div class="row"><span class="field-label" style="min-width:90px">Vitaminas</span><input class="field-input" id="ex_vitaminas" type="text" placeholder="Vit D, B12, ferro..."></div>
+        <div class="row"><span class="field-label" style="min-width:90px">Intolerâncias</span><input class="field-input" id="ex_intol" type="text" placeholder="—"></div>
+        <div class="row"><span class="field-label" style="min-width:90px">Outro</span><input class="field-input" id="ex_outro" type="text" placeholder="—"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A -->
+  <div class="section">
+    <div class="sec-title">A — Avaliação</div>
+
+    <div class="row">
+      <span class="field-label">Diagnósticos</span>
+      <div class="chips" id="diagnosticos">
+        <div class="chip" onclick="toggle(this)">Obesidade / sobrepeso</div>
+        <div class="chip" onclick="toggle(this)">Gordura visceral</div>
+        <div class="chip" onclick="toggle(this)">RI / pré-diabetes</div>
+        <div class="chip" onclick="toggle(this)">Dislipidemia</div>
+        <div class="chip" onclick="toggle(this)">Esteatose hepática</div>
+        <div class="chip" onclick="toggle(this)">Compulsão / fome emocional</div>
+        <div class="chip" onclick="toggle(this)">Baixa proteína</div>
+        <div class="chip" onclick="toggle(this)">Sedentarismo / baixa MM</div>
+        <div class="chip" onclick="toggle(this)">Privação de sono</div>
+        <div class="chip" onclick="toggle(this)">Hipovitaminose</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="sub-label">Estratificação de risco</div>
+    <div class="three-col">
+      <div>
+        <div style="font-size:11px;color:#888780;margin-bottom:.35rem">Complexidade clínica</div>
+        <div class="chips" id="complexidade">
+          <div class="chip success" onclick="toggleSingle(this,'complexidade')">Baixa</div>
+          <div class="chip warn" onclick="toggleSingle(this,'complexidade')">Moderada</div>
+          <div class="chip danger" onclick="toggleSingle(this,'complexidade')">Alta</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#888780;margin-bottom:.35rem">Risco metabólico</div>
+        <div class="chips" id="riscoMetab">
+          <div class="chip success" onclick="toggleSingle(this,'riscoMetab')">Baixo</div>
+          <div class="chip warn" onclick="toggleSingle(this,'riscoMetab')">Moderado</div>
+          <div class="chip danger" onclick="toggleSingle(this,'riscoMetab')">Alto</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#888780;margin-bottom:.35rem">Risco CV</div>
+        <div class="chips" id="riscoCV">
+          <div class="chip success" onclick="toggleSingle(this,'riscoCV')">Baixo</div>
+          <div class="chip warn" onclick="toggleSingle(this,'riscoCV')">Moderado</div>
+          <div class="chip danger" onclick="toggleSingle(this,'riscoCV')">Alto</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#888780;margin-bottom:.35rem">Risco perda MM</div>
+        <div class="chips" id="riscoMM">
+          <div class="chip success" onclick="toggleSingle(this,'riscoMM')">Baixo</div>
+          <div class="chip warn" onclick="toggleSingle(this,'riscoMM')">Moderado</div>
+          <div class="chip danger" onclick="toggleSingle(this,'riscoMM')">Alto</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#888780;margin-bottom:.35rem">Risco baixa adesão</div>
+        <div class="chips" id="riscoAdesao">
+          <div class="chip success" onclick="toggleSingle(this,'riscoAdesao')">Baixo</div>
+          <div class="chip warn" onclick="toggleSingle(this,'riscoAdesao')">Moderado</div>
+          <div class="chip danger" onclick="toggleSingle(this,'riscoAdesao')">Alto</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <span class="field-label">Barreira principal</span>
+      <div class="chips" id="barreira">
+        <div class="chip" onclick="toggleSingle(this,'barreira')">Metabólica</div>
+        <div class="chip" onclick="toggleSingle(this,'barreira')">Comportamental</div>
+        <div class="chip" onclick="toggleSingle(this,'barreira')">Rotina</div>
+        <div class="chip" onclick="toggleSingle(this,'barreira')">Emocional</div>
+        <div class="chip" onclick="toggleSingle(this,'barreira')">Baixa MM</div>
+        <div class="chip" onclick="toggleSingle(this,'barreira')">Adesão</div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:.375rem">
+      <span class="field-label">Momento</span>
+      <div class="chips" id="momento">
+        <div class="chip" onclick="toggleSingle(this,'momento')">Desorganizado</div>
+        <div class="chip" onclick="toggleSingle(this,'momento')">Iniciando</div>
+        <div class="chip" onclick="toggleSingle(this,'momento')">Engajado</div>
+        <div class="chip" onclick="toggleSingle(this,'momento')">Avançado</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="sub-label">Nível de suporte — Método HAG</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px" id="nivelHAG">
+      <div class="nivel-chip" onclick="toggleNivel(this)">Avulso</div>
+      <div class="nivel-chip" onclick="toggleNivel(this)">Direcionamento 60</div>
+      <div class="nivel-chip" onclick="toggleNivel(this)">Smart 90</div>
+      <div class="nivel-chip" onclick="toggleNivel(this)">Smart Continuidade</div>
+      <div class="nivel-chip" onclick="toggleNivel(this)">Ciclo Essencial</div>
+      <div class="nivel-chip" onclick="toggleNivel(this)">Ciclo Reset</div>
+      <div class="nivel-chip" onclick="toggleNivel(this)">Ciclo Transforma</div>
+      <div class="nivel-chip" onclick="toggleNivel(this)">Manutenção</div>
+    </div>
+  </div>
+
+  <!-- P -->
+  <div class="section">
+    <div class="sec-title">P — Plano</div>
+
+    <div class="row">
+      <span class="field-label">Objetivo inicial</span>
+      <input class="field-input" id="objTerapeutico" type="text" placeholder="Meta clínica prioritária desta fase">
+    </div>
+
+    <div class="divider"></div>
+    <div class="sub-label">Alimentação</div>
+    <div class="row">
+      <span class="field-label">Estratégia</span>
+      <input class="field-input" id="estratAlim" type="text" placeholder="Low carb, jejum, ciclagem...">
+    </div>
+    <div class="row">
+      <span class="field-label">Foco</span>
+      <div class="chips" id="focoAlim">
+        <div class="chip" onclick="toggle(this)">Déficit</div>
+        <div class="chip" onclick="toggle(this)">Proteína</div>
+        <div class="chip" onclick="toggle(this)">Fibras</div>
+        <div class="chip" onclick="toggle(this)">Organização</div>
+        <div class="chip" onclick="toggle(this)">Glicemia</div>
+        <div class="chip" onclick="toggle(this)">Saciedade</div>
+        <div class="chip" onclick="toggle(this)">Anti-inflamatório</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="sub-label">Suplementação</div>
+    <div class="row"><span class="field-label">Essencial</span><input class="field-input" id="suplEssencial" type="text" placeholder="Ex: whey, creatina, vit D..."></div>
+    <div class="row"><span class="field-label">Específico</span><input class="field-input" id="suplEspecifico" type="text" placeholder="Conforme diagnóstico..."></div>
+    <div class="row"><span class="field-label">Complementar</span><input class="field-input" id="suplCompl" type="text" placeholder="Opcional / fase seguinte..."></div>
+
+    <div class="divider"></div>
+    <div class="sub-label">Treino</div>
+    <div class="row">
+      <span class="field-label">Frequência</span>
+      <input class="field-input" id="treinoFreq" type="text" placeholder="x/semana" style="max-width:90px">
+      <span class="field-label" style="min-width:80px">Modalidade</span>
+      <input class="field-input" id="treinoModal" type="text" placeholder="Musculação, caminhada...">
+    </div>
+
+    <div class="divider"></div>
+    <div class="sub-label">Medicação</div>
+    <div class="row">
+      <span class="field-label">Status</span>
+      <div class="chips" id="medStatus">
+        <div class="chip" onclick="toggleSingle(this,'medStatus')">Não indicada</div>
+        <div class="chip" onclick="toggleSingle(this,'medStatus')">Iniciada</div>
+        <div class="chip" onclick="toggleSingle(this,'medStatus')">Mantida</div>
+        <div class="chip" onclick="toggleSingle(this,'medStatus')">Ajustar</div>
+      </div>
+    </div>
+    <div class="row"><span class="field-label">Prescrição</span><input class="field-input" id="medPrescricao" type="text" placeholder="Medicamento / dose / posologia"></div>
+    <div class="row">
+      <span class="field-label">Estratégia futura</span>
+      <div class="chips" id="medFutura">
+        <div class="chip" onclick="toggleSingle(this,'medFutura')">Manter</div>
+        <div class="chip" onclick="toggleSingle(this,'medFutura')">Progressão</div>
+        <div class="chip" onclick="toggleSingle(this,'medFutura')">Desmame</div>
+        <div class="chip" onclick="toggleSingle(this,'medFutura')">Reavaliar</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="sub-label">Exames</div>
+    <div class="row">
+      <span class="field-label">Solicitar</span>
+      <div class="chips" id="examesSolic">
+        <div class="chip" onclick="toggle(this)">Painel metabólico</div>
+        <div class="chip" onclick="toggle(this)">Painel hormonal</div>
+        <div class="chip" onclick="toggle(this)">Outro</div>
+      </div>
+      <input class="field-input" id="examesOutro" type="text" placeholder="Especificar..." style="max-width:180px">
+      <span style="font-size:12px;color:#888780;padding-top:6px;margin-left:4px">Controle em</span>
+      <input class="field-input" id="examesDias" type="text" placeholder="dias" style="max-width:70px">
+    </div>
+
+    <div class="divider"></div>
+    <div class="sub-label">Protocolo complementar</div>
+    <div class="row">
+      <span class="field-label">Status</span>
+      <div class="chips" id="protStatus">
+        <div class="chip" onclick="toggleSingle(this,'protStatus')">Não indicado</div>
+        <div class="chip" onclick="toggleSingle(this,'protStatus')">Iniciado</div>
+        <div class="chip" onclick="toggleSingle(this,'protStatus')">Futuro</div>
+      </div>
+    </div>
+    <div class="row">
+      <span class="field-label">Protocolo</span>
+      <div class="chips" id="protTipo">
+        <div class="chip" onclick="toggle(this)">Metabólico</div>
+        <div class="chip" onclick="toggle(this)">Reconstrução corporal</div>
+        <div class="chip" onclick="toggle(this)">Performance e energia</div>
+        <div class="chip" onclick="toggle(this)">Lipedema</div>
+        <div class="chip" onclick="toggle(this)">Queda capilar</div>
+        <div class="chip" onclick="toggle(this)">Outro</div>
+      </div>
+    </div>
+    <div class="row">
+      <span class="field-label">Observação</span>
+      <input class="field-input" id="protObs" type="text" placeholder="Detalhes / timing / justificativa...">
+    </div>
+
+    <div class="divider"></div>
+    <div class="sub-label">Próximos passos</div>
+    <div class="row">
+      <span class="field-label">Foco C1 (D30)</span>
+      <input class="field-input" id="proximoFoco" type="text" placeholder="Principal ajuste esperado para D30">
+    </div>
+    <div class="row">
+      <span class="field-label">Retorno</span>
+      <input class="field-input" id="retorno" type="text" placeholder="dias" style="max-width:80px">
+      <span class="field-label" style="min-width:55px">Ciclo</span>
+      <input class="field-input" id="cicloIndicado" type="text" placeholder="Produto indicado">
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggle(el){el.classList.toggle('on')}
+function toggleSingle(el,groupId){
+  const group=document.getElementById(groupId);
+  const chips=group?group.querySelectorAll('.chip'):[];
+  const wasOn=el.classList.contains('on');
+  chips.forEach(c=>c.classList.remove('on'));
+  if(!wasOn)el.classList.add('on');
+}
+function toggleNivel(el){
+  document.querySelectorAll('#nivelHAG .nivel-chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+}
+function getChips(id){
+  const el=document.getElementById(id);
+  if(!el)return'—';
+  const on=[...el.querySelectorAll('.chip.on,.nivel-chip.on')].map(c=>c.textContent.trim());
+  return on.length?on.join(', '):'—';
+}
+function getNivel(){
+  const on=document.querySelector('#nivelHAG .nivel-chip.on');
+  return on?on.textContent.trim():'—';
+}
+function val(id){const el=document.getElementById(id);return el&&el.value.trim()?el.value.trim():'—'}
+
+function copiarProntuario(){
+  const linha='─'.repeat(50);
+  const txt=`CONSULTA 0 — DIAGNÓSTICO | MÉTODO HAG
+Dr. Henrique Gonzaga | CRM/SP 226530
+${linha}
+
+PACIENTE
+Nome: ${val('pacNome')} | Idade: ${val('pacIdade')} anos | Nasc.: ${val('pacNasc')}
+Sexo: ${getChips('pacSexo')} | Data: ${val('pacData')} | ${getChips('pacModalidade')}
+
+${linha}
+S — SUBJETIVO
+Queixa principal: ${val('queixa')}
+Objetivo: ${val('objetivo')}
+Tentativas anteriores: ${val('tentativas')}
+Maior dificuldade: ${getChips('dificuldade')}
+Perfil alimentar: ${getChips('perfil')}
+
+História ponderal
+Peso máx.: ${val('pesoMax')} kg | Peso desejado: ${val('pesoDesejado')} kg
+Início do ganho: ${val('inicioGanho')}
+Rebote: ${getChips('rebote')} | Med. prévia: ${val('medPrevia')}
+
+Comportamento
+Sono: ${getChips('sono')}${val('sonoHorario') !== '—' ? ' ('+val('sonoHorario')+')' : ''} | Estresse: ${getChips('estresse')}
+Fome emocional: ${getChips('fomeEmocional')} | Período difícil: ${getChips('periodo')}
+Álcool: ${getChips('alcool')} | Atividade física: ${val('atividadeFisica')}
+Disposição p/ mudança: ${val('disposicao')}/10
+
+${linha}
+O — OBJETIVO
+InBody (Ponto A)
+Peso: ${val('ib_peso')} kg | Magra: ${val('ib_magra')} kg | Gordura: ${val('ib_gord_kg')} kg (${val('ib_gord_pct')}%)
+Visceral: ${val('ib_visc')} | Perfil InBody: ${val('ib_perfil')}
+Perfil corporal: ${getChips('perfilCorporal')}
+
+Exames
+Glicêmico: ${val('ex_glicemico')}
+Lipídios/CV: ${val('ex_lipidios')}
+Inflamação: ${val('ex_inflamacao')}
+Hormonal: ${val('ex_hormonal')}
+Hepático/renal: ${val('ex_hepatico')}
+Vitaminas: ${val('ex_vitaminas')}
+Intolerâncias: ${val('ex_intol')}
+Outro: ${val('ex_outro')}
+
+${linha}
+A — AVALIAÇÃO
+Diagnósticos: ${getChips('diagnosticos')}
+
+Estratificação
+Complexidade: ${getChips('complexidade')} | Risco metab.: ${getChips('riscoMetab')} | Risco CV: ${getChips('riscoCV')}
+Risco perda MM: ${getChips('riscoMM')} | Risco adesão: ${getChips('riscoAdesao')}
+Barreira principal: ${getChips('barreira')} | Momento: ${getChips('momento')}
+
+Nível de suporte — Método HAG: ${getNivel()}
+
+${linha}
+P — PLANO
+Objetivo terapêutico: ${val('objTerapeutico')}
+
+Alimentação
+Estratégia: ${val('estratAlim')} | Foco: ${getChips('focoAlim')}
+
+Suplementação
+Essencial: ${val('suplEssencial')}
+Específico: ${val('suplEspecifico')}
+Complementar: ${val('suplCompl')}
+
+Treino: ${val('treinoFreq')}x/semana | ${val('treinoModal')}
+
+Medicação
+Status: ${getChips('medStatus')}
+Prescrição: ${val('medPrescricao')}
+Estratégia futura: ${getChips('medFutura')}
+
+Exames: ${getChips('examesSolic')}${val('examesOutro') !== '—' ? ' — '+val('examesOutro') : ''} | Controle em: ${val('examesDias')} dias
+
+Protocolo complementar
+Status: ${getChips('protStatus')}
+Tipo: ${getChips('protTipo')}
+Observação: ${val('protObs')}
+
+Próximos passos
+Foco C1 (D30): ${val('proximoFoco')}
+Retorno em: ${val('retorno')} dias | Ciclo indicado: ${val('cicloIndicado')}`;
+
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn=document.getElementById('copyBtn');
+    btn.textContent='Copiado!';
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copiar prontuário';btn.classList.remove('copied')},2000);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    const btn=document.getElementById('copyBtn');
+    btn.textContent='Copiado!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copiar prontuário';btn.classList.remove('copied')},2000);
+  });
+}
+</script>
+</body>
+</html>
